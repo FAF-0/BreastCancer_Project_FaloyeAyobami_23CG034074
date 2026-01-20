@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breast Cancer Prediction System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Breast Cancer Prediction System</h1>
+            <p class="subtitle">Machine Learning-Based Diagnostic Support</p>
+            <div class="disclaimer">
+                <strong>⚠️ Disclaimer:</strong> This system is for <strong>educational purposes only</strong>. 
+                It is NOT a medical diagnostic tool and should not be used for actual medical diagnosis. 
+                Always consult with qualified medical professionals.
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="form-section">
+                <h2>Enter Tumor Features</h2>
+                <form id="predictionForm">
+                    <div class="form-group">
+                        <label for="radius_mean">Radius Mean:</label>
+                        <input type="number" id="radius_mean" name="radius_mean" 
+                               step="0.01" min="0" required placeholder="e.g., 17.99">
+                        <small>Average radius of the tumor (mm)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="texture_mean">Texture Mean:</label>
+                        <input type="number" id="texture_mean" name="texture_mean" 
+                               step="0.01" min="0" required placeholder="e.g., 10.38">
+                        <small>Average texture of the tumor</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="perimeter_mean">Perimeter Mean:</label>
+                        <input type="number" id="perimeter_mean" name="perimeter_mean" 
+                               step="0.01" min="0" required placeholder="e.g., 122.8">
+                        <small>Average perimeter of the tumor (mm)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="area_mean">Area Mean:</label>
+                        <input type="number" id="area_mean" name="area_mean" 
+                               step="0.01" min="0" required placeholder="e.g., 1001">
+                        <small>Average area of the tumor (mm²)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="smoothness_mean">Smoothness Mean:</label>
+                        <input type="number" id="smoothness_mean" name="smoothness_mean" 
+                               step="0.0001" min="0" max="1" required placeholder="e.g., 0.1184">
+                        <small>Average smoothness of the tumor (0-1)</small>
+                    </div>
+
+                    <button type="submit" class="btn-predict">Predict Diagnosis</button>
+                </form>
+            </div>
+
+            <div class="result-section" id="resultSection" style="display:none;">
+                <h2>Prediction Result</h2>
+                <div id="resultBox" class="result-box"></div>
+            </div>
+
+            <div class="info-section">
+                <h3>About This System</h3>
+                <ul>
+                    <li><strong>Algorithm:</strong> Support Vector Machine (SVM)</li>
+                    <li><strong>Features Used:</strong> radius_mean, texture_mean, perimeter_mean, area_mean, smoothness_mean</li>
+                    <li><strong>Training Data:</strong> Wisconsin Breast Cancer Diagnostic Dataset</li>
+                    <li><strong>Classes:</strong> Benign (B) or Malignant (M)</li>
+                    <li><strong>Model Persistence:</strong> Joblib</li>
+                </ul>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 Breast Cancer Prediction System | Educational Purpose Only</p>
+        </footer>
+    </div>
+
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                radius_mean: document.getElementById('radius_mean').value,
+                texture_mean: document.getElementById('texture_mean').value,
+                perimeter_mean: document.getElementById('perimeter_mean').value,
+                area_mean: document.getElementById('area_mean').value,
+                smoothness_mean: document.getElementById('smoothness_mean').value
+            };
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    displayResult(result);
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error making prediction: ' + error);
+            }
+        });
+
+        function displayResult(result) {
+            const resultSection = document.getElementById('resultSection');
+            const resultBox = document.getElementById('resultBox');
+            
+            const className = result.diagnosis === 'M' ? 'malignant' : 'benign';
+            const icon = result.diagnosis === 'M' ? '⚠️' : '✅';
+            
+            resultBox.innerHTML = `
+                <div class="diagnosis ${className}">
+                    <h3>${icon} Prediction Result</h3>
+                    <p class="diagnosis-label">${result.diagnosis_full}</p>
+                    <p class="confidence">Confidence Score: ${(result.confidence * 100).toFixed(1)}%</p>
+                    <p class="medical-note">
+                        <strong>Note:</strong> This is a machine learning prediction for educational purposes only.
+                        Please consult a medical professional for actual diagnosis and treatment.
+                    </p>
+                </div>
+            `;
+            
+            resultSection.style.display = 'block';
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

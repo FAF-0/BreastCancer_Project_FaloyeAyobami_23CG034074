@@ -1,0 +1,6 @@
+Name: Faloye Ayobami
+Matric Number: 23CG034074
+Machine Learning Algorithm Used: Support Vector Machine (SVM)
+Model Persistence Method: Joblib
+Live URL of the Hosted Application: [Will be added after deployment]
+GitHub Repository Link: [Will be added after GitHub upload]
